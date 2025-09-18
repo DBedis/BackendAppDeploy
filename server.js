@@ -33,16 +33,31 @@ app.use((req, res, next) => {
 });
 
 // DNS verification before connection attempts
-const verifyDNSResolution = async (hostname = 'mongo') => {
+const verifyDNSResolution = async (uriString) => {
+  const parsed = new URL(uriString);
+  const isSrv = parsed.protocol === 'mongodb+srv:';
+  const host = parsed.hostname || 'mongo';
   return new Promise((resolve, reject) => {
-    dns.lookup(hostname, (err) => {
-      if (err) {
-        console.error(`DNS resolution failed for ${hostname}:`, err);
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
+    if (isSrv) {
+      const srvRecord = `_mongodb._tcp.${host}`;
+      dns.resolveSrv(srvRecord, (err) => {
+        if (err) {
+          console.error(`DNS SRV resolution failed for ${srvRecord}:`, err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    } else {
+      dns.lookup(host, (err) => {
+        if (err) {
+          console.error(`DNS resolution failed for ${host}:`, err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    }
   });
 };
 
@@ -52,23 +67,21 @@ const getMongoURI = () => {
 
   // Ensure critical parameters are always present
   const url = new URL(baseURI);
-  url.searchParams.set('directConnection', 'true');
   url.searchParams.set('retryWrites', 'true');
   url.searchParams.set('w', 'majority');
-  url.searchParams.set('appName', 'ArenaVRAdminPanel');
+  url.searchParams.set('appName', process.env.MONGODB_APP_NAME || 'Cluster0');
 
   return url.toString();
 };
 
 const connectWithRetry = async (attempt = 1) => {
   const uri = getMongoURI();
-  const mongoHost = new URL(uri).hostname;
   
   try {
     console.log(`Attempt ${attempt}/${CONFIG.MAX_RETRIES}: Connecting to MongoDB...`);
     
     // Verify DNS resolution first
-    await verifyDNSResolution(mongoHost);
+    await verifyDNSResolution(uri);
     
     await mongoose.connect(uri, CONFIG.MONGO_OPTIONS);
     
@@ -187,18 +200,20 @@ connectWithRetry();
 // Enhanced graceful shutdown
 const shutdown = async (signal) => {
   console.log(`🛑 Received ${signal}, shutting down gracefully...`);
-  const { server } = require('./server'); // or hoist `server` in module scope
-
   
   try {
     await mongoose.connection.close();
     console.log('🔌 MongoDB connection closed');
     
-    server.close(() => {
+    if (serverRef) {
+      serverRef.close(() => {
       console.log('🛑 HTTP server closed');
       process.exit(0);
       
-    });
+      });
+    } else {
+      process.exit(0);
+    }
     
     // Force shutdown if hanging
     setTimeout(() => {
