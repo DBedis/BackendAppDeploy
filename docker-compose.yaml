@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    image: mortadha1222/arenavr:v1.2.4   # use the pushed image
+    ports:
+      - "13776:13776"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/ArenaVRAdminPanel
+    depends_on:
+      - mongo
+    networks:
+      - backendnet
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - backendnet
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+
+networks:
+  backendnet:

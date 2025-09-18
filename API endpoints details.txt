@@ -1,0 +1,74 @@
+Reporting Endpoints (Players)
+1. PDF Reports
+GET /players/export-pdf
+
+Detailed player list PDF
+GET /players/export-basic-pdf
+
+Basic player info PDF (nickname, email, creation date)
+GET /players/export-stats-pdf
+
+Player statistics PDF (kills, deaths, score)
+
+2. Excel Reports
+GET /players/export-excel
+
+Player master list (all fields)
+GET /players/export-performance-excel
+
+Player performance report (K/D ratio, win rate, performance score)
+
+Game Session Management
+1. Session Creation
+POST /game-sessions/
+
+Creates a new game session
+
+Required Fields: mapPlayed, gameDuration, teams, numberOfPlayers
+
+2. Session Retrieval
+GET /game-sessions/
+
+Get all sessions (sorted by creation date)
+GET /game-sessions/stats
+
+Get session statistics (totals, averages, map distribution)
+
+Session Reporting Endpoints
+1. Basic Reports
+GET /game-sessions/export-excel
+
+Basic session report (map, duration, teams, scores)
+
+2. Detailed Analytics
+GET /game-sessions/export-detailed-excel
+
+Session details with calculated metrics (avg score, max score)
+
+3. Map Analytics
+GET /game-sessions/export-map-analytics-excel
+
+Map performance statistics with charts
+
+Includes: total sessions, avg duration, player metrics
+
+4. Daily Summary
+GET /game-sessions/export-daily-summary-excel
+
+Daily aggregated statistics with formulas
+
+Includes: sessions, players, duration, unique maps
+
+Utility Endpoints
+1. Health Check
+GET /health
+
+Service status check (returns "OK")
+
+2. Endpoint Documentation
+GET /game-sessions/test
+
+Lists available session endpoints
+GET /players/test
+
+Lists available player endpoints
