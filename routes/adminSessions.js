@@ -1,6 +1,6 @@
 // routes/adminSessions.js
 const express       = require('express');
-const GameSession   = require('../models/GameSession');
+const GameSession   = require('./model/GameSession');
 const { authenticateAdmin } = require('../middleware/auth');
 
 const router = express.Router();
