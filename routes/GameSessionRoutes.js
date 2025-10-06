@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const GameSession = require('./model/GameSession');
+const GameSession = require('../model/GameSession');
 const ExcelJS = require('exceljs');
 const moment = require('moment');
 

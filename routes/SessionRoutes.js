@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const GameSession = require('../model/GameSession');
-const Player = require('./model/PlayersContact');
+const Player = require('../model/PlayersContact');
 const mongoose = require('mongoose');
 
 // POST endpoint - Create game session with nicknames
